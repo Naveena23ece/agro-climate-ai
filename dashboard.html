@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agro Climate Intelligence Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial;
+            background-color: #f4f7f9;
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .anomaly-yes {
+            color: red;
+        }
+
+        .anomaly-no {
+            color: green;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        canvas {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>AI-Enabled Agro Climate Intelligence</h1>
+
+<center>
+    <button onclick="fetchData()">Refresh Data</button>
+</center>
+
+<div class="container">
+
+    <div class="card">
+        <h3>Temperature</h3>
+        <div id="temp" class="value">--</div>
+    </div>
+
+    <div class="card">
+        <h3>Humidity</h3>
+        <div id="humidity" class="value">--</div>
+    </div>
+
+    <div class="card">
+        <h3>Predicted Soil Moisture</h3>
+        <div id="soil" class="value">--</div>
+    </div>
+
+    <div class="card">
+        <h3>Confidence Score</h3>
+        <div id="confidence" class="value">--</div>
+    </div>
+
+    <div class="card">
+        <h3>Anomaly Status</h3>
+        <div id="anomaly" class="value">--</div>
+    </div>
+
+    <div class="card" style="width: 60%;">
+        <h3>Recommendation</h3>
+        <div id="recommendation" class="value">--</div>
+    </div>
+
+</div>
+
+<br>
+
+<h2>24-Hour Climate Trend (Local Data)</h2>
+<canvas id="trendChart"></canvas>
+
+<h2>Prediction History (Cloud Data)</h2>
+<canvas id="historyChart"></canvas>
+
+<script>
+
+let trendChart;
+let historyChart;
+
+async function fetchData() {
+
+    // Latest prediction
+    const response = await fetch("http://127.0.0.1:8000/predict");
+    const data = await response.json();
+
+    document.getElementById("temp").innerText = data.temperature + " °C";
+    document.getElementById("humidity").innerText = data.humidity + " %";
+    document.getElementById("soil").innerText = data.predicted_soil_moisture;
+    document.getElementById("confidence").innerText = data.confidence_score;
+
+    const anomalyElement = document.getElementById("anomaly");
+    anomalyElement.innerText = data.anomaly;
+    anomalyElement.className = data.anomaly === "Yes" ? "value anomaly-yes" : "value anomaly-no";
+
+    document.getElementById("recommendation").innerText = data.recommendation;
+
+    // Fetch local trend data
+    const trendResponse = await fetch("http://127.0.0.1:8000/trend");
+    const trendData = await trendResponse.json();
+    updateTrendChart(trendData);
+
+    // Fetch cloud history data
+    const historyResponse = await fetch("http://127.0.0.1:8000/history");
+    const historyData = await historyResponse.json();
+    updateHistoryChart(historyData.history);
+}
+
+function updateTrendChart(trendData) {
+
+    const labels = Array.from({length: trendData.temperature.length}, (_, i) => i+1);
+
+    if (trendChart) {
+        trendChart.destroy();
+    }
+
+    const ctx = document.getElementById("trendChart").getContext("2d");
+
+    trendChart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Temperature",
+                    data: trendData.temperature,
+                    borderColor: "red",
+                    fill: false
+                },
+                {
+                    label: "Humidity",
+                    data: trendData.humidity,
+                    borderColor: "blue",
+                    fill: false
+                },
+                {
+                    label: "Soil Moisture",
+                    data: trendData.soil_moisture,
+                    borderColor: "green",
+                    fill: false
+                }
+            ]
+        }
+    });
+}
+
+function updateHistoryChart(records) {
+
+    const labels = records.map(r => r.timestamp.slice(11,19));
+    const soilData = records.map(r => r.predicted_soil_moisture);
+    const confidenceData = records.map(r => r.confidence_score);
+
+    if (historyChart) {
+        historyChart.destroy();
+    }
+
+    const ctx = document.getElementById("historyChart").getContext("2d");
+
+    historyChart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Predicted Soil Moisture",
+                    data: soilData,
+                    borderColor: "purple",
+                    fill: false
+                },
+                {
+                    label: "Confidence Score",
+                    data: confidenceData,
+                    borderColor: "orange",
+                    fill: false
+                }
+            ]
+        }
+    });
+}
+
+// Load automatically
+fetchData();
+
+// Auto refresh every 15 seconds
+setInterval(fetchData, 15000);
+
+</script>
+
+</body>
+</html>
