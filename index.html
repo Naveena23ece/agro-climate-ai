@@ -3,6 +3,7 @@
 <head>
     <title>Agro Climate Intelligence Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         body {
             font-family: Arial;
@@ -56,6 +57,7 @@
         }
     </style>
 </head>
+
 <body>
 
 <h1>AI-Enabled Agro Climate Intelligence</h1>
@@ -91,7 +93,7 @@
         <div id="anomaly" class="value">--</div>
     </div>
 
-    <div class="card" style="width: 60%;">
+    <div class="card" style="width:60%;">
         <h3>Recommendation</h3>
         <div id="recommendation" class="value">--</div>
     </div>
@@ -108,40 +110,57 @@
 
 <script>
 
+const API_BASE = "https://agro-climate-ai-1.onrender.com";
+
 let trendChart;
 let historyChart;
 
 async function fetchData() {
 
-    // Latest prediction
-    const response = await fetch("http://127.0.0.1:8000/predict");
-    const data = await response.json();
+    try {
 
-    document.getElementById("temp").innerText = data.temperature + " °C";
-    document.getElementById("humidity").innerText = data.humidity + " %";
-    document.getElementById("soil").innerText = data.predicted_soil_moisture;
-    document.getElementById("confidence").innerText = data.confidence_score;
+        // Latest prediction
+        const response = await fetch(`${API_BASE}/predict`);
+        const data = await response.json();
 
-    const anomalyElement = document.getElementById("anomaly");
-    anomalyElement.innerText = data.anomaly;
-    anomalyElement.className = data.anomaly === "Yes" ? "value anomaly-yes" : "value anomaly-no";
+        document.getElementById("temp").innerText = data.temperature + " °C";
+        document.getElementById("humidity").innerText = data.humidity + " %";
+        document.getElementById("soil").innerText = data.predicted_soil_moisture;
+        document.getElementById("confidence").innerText = data.confidence_score;
 
-    document.getElementById("recommendation").innerText = data.recommendation;
+        const anomalyElement = document.getElementById("anomaly");
+        anomalyElement.innerText = data.anomaly;
+        anomalyElement.className =
+            data.anomaly === "Yes" ? "value anomaly-yes" : "value anomaly-no";
 
-    // Fetch local trend data
-    const trendResponse = await fetch("http://127.0.0.1:8000/trend");
-    const trendData = await trendResponse.json();
-    updateTrendChart(trendData);
+        document.getElementById("recommendation").innerText =
+            data.recommendation;
 
-    // Fetch cloud history data
-    const historyResponse = await fetch("http://127.0.0.1:8000/history");
-    const historyData = await historyResponse.json();
-    updateHistoryChart(historyData.history);
+        // Trend data
+        const trendResponse = await fetch(`${API_BASE}/trend`);
+        const trendData = await trendResponse.json();
+
+        updateTrendChart(trendData);
+
+        // History data
+        const historyResponse = await fetch(`${API_BASE}/history`);
+        const historyData = await historyResponse.json();
+
+        updateHistoryChart(historyData.history);
+
+    } catch (error) {
+
+        console.error("API Error:", error);
+
+    }
 }
 
 function updateTrendChart(trendData) {
 
-    const labels = Array.from({length: trendData.temperature.length}, (_, i) => i+1);
+    const labels = Array.from(
+        { length: trendData.temperature.length },
+        (_, i) => i + 1
+    );
 
     if (trendChart) {
         trendChart.destroy();
@@ -220,5 +239,4 @@ setInterval(fetchData, 15000);
 </script>
 
 </body>
-
 </html>
