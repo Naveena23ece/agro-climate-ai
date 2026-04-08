@@ -188,29 +188,31 @@ def smart_decision(soil: float, rainfall: int, humidity: float,
 
     # Irrigation
     if rainfall == 1:
-        advice.append("🌧 Rain detected — do not irrigate now.")
+        advice.append("🌧 Rain detected — irrigation not needed.")
         tags.append("Irrigation"); alert = "warning"
     elif soil < 30:
         if rain_forecast > 60:
-            advice.append(f"🌦 Rain expected ({rain_forecast:.0f}%) — wait, skip irrigation.")
+            advice.append(f"🌦 Soil critically dry but rain expected ({rain_forecast:.0f}%) — wait 2h before irrigating.")
+            if alert == "normal": alert = "warning"
         else:
             advice.append("🚰 Soil critically dry — start irrigation immediately.")
             alert = "critical"
         tags.append("Irrigation")
     elif soil < 50:
         if rain_forecast > 60:
-            advice.append(f"🌦 Rain likely ({rain_forecast:.0f}%) — hold irrigation.")
+            advice.append(f"🌦 Rain likely ({rain_forecast:.0f}%) — hold irrigation for now.")
         elif rain_forecast > 40:
-            advice.append(f"🌤 Moderate rain ({rain_forecast:.0f}%) — light irrigation if needed.")
+            advice.append(f"🌤 Moderate rain chance ({rain_forecast:.0f}%) — light irrigation if needed.")
         else:
             advice.append("💧 Soil moisture low — irrigation recommended.")
             if alert == "normal": alert = "warning"
         tags.append("Irrigation")
     elif soil <= 70:
-        advice.append("✅ Soil moisture optimal — no irrigation needed.")
+        if rainfall == 0:
+            advice.append("✅ Soil moisture optimal — no irrigation needed.")
         tags.append("Monitoring")
     else:
-        advice.append("🚫 Soil moisture high — skip irrigation, allow soil to dry.")
+        advice.append("🚫 Soil over-saturated — skip irrigation, allow soil to dry.")
         tags.append("Irrigation")
 
     # Fertilizer
