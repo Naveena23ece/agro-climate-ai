@@ -1,8 +1,9 @@
 fastapi
 uvicorn
 pandas
+requests
 numpy
 joblib
 firebase-admin
-scikit-learn
+scikit-learn==1.7.2
 python-dotenv

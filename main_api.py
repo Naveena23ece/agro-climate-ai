@@ -427,6 +427,7 @@ def history():
 
 
 @app.get("/")
+@app.head("/")
 def home():
     return {
         "status":    "running",
