@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: agro-climate-ai-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main_api:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: FIREBASE_DB_URL
+        sync: false
+      - key: FIREBASE_KEY
+        sync: false
+      - key: OPENWEATHER_API_KEY
+        sync: false
+      - key: OPENWEATHER_CITY
+        value: Coimbatore

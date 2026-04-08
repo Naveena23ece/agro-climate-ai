@@ -1,3 +1,21 @@
-firebase_key.json
+# Python
 __pycache__/
+*.pyc
+*.pyo
 .env
+venv/
+.venv/
+
+# Secrets
+firebase_key.json
+backend/firebase_key.json
+
+# Models (large binaries — commit only if needed)
+# backend/models/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/

@@ -1,9 +1,9 @@
 {
   "name": "Agro Climate AI",
   "short_name": "AgroAI",
-  "start_url": "/agro-climate-ai/",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
+  "background_color": "#0a0e1a",
   "theme_color": "#0f172a",
   "icons": [
     {
